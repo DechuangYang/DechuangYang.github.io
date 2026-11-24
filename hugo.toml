@@ -1,0 +1,89 @@
+baseURL = "https://dechuangyang.github.io/"
+locale = "zh-cn"
+defaultContentLanguage = "zh"
+hasCJKLanguage = true
+title = "纸间 · Paper Margin"
+theme = "PaperMod"
+enableRobotsTXT = true
+
+[pagination]
+  pagerSize = 10
+
+[outputs]
+  home = ["HTML", "RSS", "JSON"]
+
+[params]
+  env = "production"
+  title = "纸间 · Paper Margin"
+  description = "写一点日常，也写一点技术。"
+  author = "DechuangYang"
+  defaultTheme = "auto"
+  DateFormat = "2006-01-02"
+  ShowReadingTime = true
+  ShowWordCount = true
+  ShowShareButtons = false
+  ShowPostNavLinks = true
+  ShowBreadCrumbs = true
+  ShowCodeCopyButtons = true
+  ShowRssButtonInSectionTermList = true
+  ShowToc = true
+  TocOpen = true
+  comments = false
+
+  [params.assets]
+    favicon = "favicon.svg"
+
+  [params.homeInfoParams]
+    Title = "纸间 · Paper Margin"
+    Content = "写一点日常，也写一点技术。记录软件工程、系统架构与日常随笔。"
+
+  [[params.socialIcons]]
+    name = "github"
+    url = "https://github.com/DechuangYang"
+
+  [params.fuseOpts]
+    isCaseSensitive = false
+    shouldSort = true
+    location = 0
+    distance = 1000
+    threshold = 0.4
+    minMatchCharLength = 0
+    limit = 10
+    keys = ["title", "permalink", "summary", "content"]
+
+[[menu.main]]
+  identifier = "home"
+  name = "首页"
+  url = "/"
+  weight = 10
+
+[[menu.main]]
+  identifier = "archives"
+  name = "归档"
+  url = "/archives/"
+  weight = 20
+
+[[menu.main]]
+  identifier = "categories"
+  name = "分类"
+  url = "/categories/"
+  weight = 30
+
+[[menu.main]]
+  identifier = "tags"
+  name = "标签"
+  url = "/tags/"
+  weight = 40
+
+[[menu.main]]
+  identifier = "search"
+  name = "搜索"
+  url = "/search/"
+  weight = 50
+
+[markup]
+  [markup.highlight]
+    noClasses = false
+  [markup.goldmark]
+    [markup.goldmark.renderer]
+      unsafe = false
