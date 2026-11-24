@@ -1,0 +1,52 @@
+media:
+  input: static/images
+  output: /images
+
+content:
+  - name: posts
+    label: 文章
+    type: collection
+    path: content/posts
+    format: yaml-frontmatter
+    filename: "{year}-{month}-{day}-{primary}.md"
+    subfolders: true
+    view:
+      fields: [title, date, categories, draft]
+      primary: title
+      sort: [date, title]
+      default:
+        sort: date
+        order: desc
+    fields:
+      - name: title
+        label: 标题
+        type: string
+        required: true
+      - name: date
+        label: 日期
+        type: date
+        required: true
+      - name: draft
+        label: 存为草稿（勾选后暂不公开显示）
+        type: boolean
+        default: false
+      - name: categories
+        label: 分类
+        type: select
+        default: ["技术笔记"]
+        options:
+          multiple: true
+          creatable: true
+          values:
+            - 技术笔记
+            - 随笔
+      - name: tags
+        label: 标签
+        type: string
+        list: true
+      - name: summary
+        label: 摘要（可选）
+        type: text
+      - name: body
+        label: 正文
+        type: rich-text
