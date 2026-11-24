@@ -1,0 +1,147 @@
+{{- define "main" }}
+<div class="pm-write">
+  <div class="pm-topbar">
+    <div>
+      <h1>写文章</h1>
+      <p>支持 Markdown 实时分栏预览、粘贴或拖拽截图、自动保存本机草稿，并一键发布到本站。</p>
+    </div>
+  </div>
+
+  <div class="pm-grid">
+    <aside class="pm-sidebar">
+      <div class="pm-sidehead">
+        <div class="pm-sidehead-title">
+          <h2>本机草稿</h2>
+          <span id="pm-draft-count" class="pm-badge">0</span>
+        </div>
+        <button type="button" id="pm-new-post" class="pm-btn pm-btn-primary pm-btn-sm" disabled>+ 新文章</button>
+      </div>
+      <ul id="pm-draft-list" class="pm-draft-list"></ul>
+      <div class="pm-draft-tools">
+        <button type="button" id="pm-export-drafts" class="pm-btn pm-btn-sm pm-btn-full" disabled>导出草稿备份</button>
+        <label class="pm-import-label">导入草稿备份 <input type="file" id="pm-import-drafts" accept=".json,application/json" disabled></label>
+      </div>
+    </aside>
+
+    <form id="pm-form" class="pm-form">
+      <fieldset disabled>
+        <div class="pm-card">
+          <div class="pm-meta">
+            <div class="pm-fields">
+              <label class="pm-field">
+                <span class="pm-sr">标题</span>
+                <input name="title" maxlength="100" placeholder="输入文章标题…">
+              </label>
+              <label class="pm-field">
+                <span class="pm-sr">分类</span>
+                <select name="category" aria-label="文章分类">
+                  <option value="技术笔记">技术笔记</option>
+                  <option value="随笔">随笔</option>
+                </select>
+              </label>
+            </div>
+            <div class="pm-fields pm-fields-sub">
+              <label class="pm-field">
+                <span class="pm-sr">摘要</span>
+                <input name="summary" maxlength="240" placeholder="一句话摘要（可选，显示在首页列表）">
+              </label>
+              <label class="pm-field">
+                <span class="pm-sr">标签</span>
+                <input name="tags" maxlength="120" placeholder="标签（逗号分隔，如 AI, 架构）">
+              </label>
+            </div>
+          </div>
+
+          <div class="pm-toolbar" role="toolbar" aria-label="Markdown 格式与视图切换">
+            <div class="pm-format-group">
+              <button type="button" class="pm-tool" data-md="h2" title="二级标题">H2</button>
+              <button type="button" class="pm-tool" data-md="h3" title="三级标题">H3</button>
+              <span class="pm-sep" aria-hidden="true"></span>
+              <button type="button" class="pm-tool" data-md="bold" title="加粗">B</button>
+              <button type="button" class="pm-tool" data-md="italic" title="斜体">I</button>
+              <button type="button" class="pm-tool" data-md="code" title="行内代码">`</button>
+              <button type="button" class="pm-tool" data-md="codeblock" title="代码块">{ }</button>
+              <span class="pm-sep" aria-hidden="true"></span>
+              <button type="button" class="pm-tool" data-md="quote" title="引用">引用</button>
+              <button type="button" class="pm-tool" data-md="list" title="列表">列表</button>
+              <button type="button" class="pm-tool" data-md="link" title="链接">链接</button>
+              <button type="button" class="pm-tool" data-md="table" title="表格">表格</button>
+            </div>
+            <div class="pm-view-tabs" role="group" aria-label="视图模式">
+              <button type="button" class="pm-view-tab" data-mode="edit" aria-pressed="false">编辑</button>
+              <button type="button" class="pm-view-tab" data-mode="split" aria-pressed="true">分栏</button>
+              <button type="button" class="pm-view-tab" data-mode="preview" aria-pressed="false">预览</button>
+            </div>
+          </div>
+
+          <div id="pm-panes" class="pm-panes mode-split">
+            <div class="pm-write-pane">
+              <label class="pm-sr" for="pm-body">正文 Markdown</label>
+              <textarea id="pm-body" name="body" rows="16" maxlength="60000" aria-describedby="pm-paste-hint" placeholder="使用 Markdown 开始写作… 可直接粘贴或拖拽截图。"></textarea>
+            </div>
+            <section id="pm-preview" class="pm-preview-pane" aria-label="实时预览">
+              <div class="post-content pm-prose"></div>
+            </section>
+          </div>
+
+          <div class="pm-footer">
+            <div class="pm-footer-info">
+              <p id="pm-word-count" class="pm-word-count" aria-live="polite">0 字</p>
+              <p id="pm-paste-hint" class="pm-hint">支持粘贴/拖拽 PNG、JPEG、GIF、WebP（≤ 8 MB） · Ctrl+S 保存</p>
+            </div>
+            <div class="pm-actions">
+              <p id="pm-status" class="pm-status" role="status"></p>
+              <button type="button" id="pm-save" class="pm-btn pm-btn-primary pm-btn-sm">保存草稿</button>
+            </div>
+          </div>
+        </div>
+
+        <details class="pm-publish-panel">
+          <summary>发布到 GitHub（在线上线）与文章管理</summary>
+          <div class="pm-publish-body">
+            <label class="pm-field">
+              <span class="pm-field-label">GitHub 细粒度访问令牌（Fine-grained PAT，需 <code>DechuangYang.github.io</code> 的 Contents 读写权限）</span>
+              <input id="pm-token" type="password" autocomplete="off" placeholder="github_pat_...">
+            </label>
+            <label class="pm-checkbox">
+              <input id="pm-remember-token" type="checkbox">
+              在当前标签页会话中记住令牌（关闭标签页后自动清除）
+            </label>
+            <label class="pm-checkbox">
+              <input id="pm-publish-confirm" type="checkbox">
+              我确认将这篇文章和正文图片公开发布到 https://dechuangyang.github.io/
+            </label>
+            <div class="pm-publish-actions">
+              <button type="submit" id="pm-publish" class="pm-btn pm-btn-primary">发布文章</button>
+              <p id="pm-publish-status" class="pm-status" role="status"></p>
+              <a id="pm-commit-link" class="pm-link" target="_blank" rel="noopener" hidden>查看 GitHub 提交 ↗</a>
+              <a id="pm-actions-link" class="pm-link" href="https://github.com/DechuangYang/DechuangYang.github.io/actions" target="_blank" rel="noopener" hidden>查看部署进度 ↗</a>
+            </div>
+
+            <details class="pm-delete-panel">
+              <summary>删除已发布文章</summary>
+              <div class="pm-publish-body">
+                <div class="pm-delete-row">
+                  <select id="pm-delete-target" aria-label="选择已发布文章">
+                    <option value="">点击「加载文章列表」获取已发布文章</option>
+                  </select>
+                  <button type="button" id="pm-load-posts" class="pm-btn pm-btn-sm">加载文章列表</button>
+                </div>
+                <label class="pm-checkbox">
+                  <input id="pm-delete-confirm" type="checkbox">
+                  我确认删除选中的已发布文章（提交后约 30 秒自动下线）
+                </label>
+                <div class="pm-publish-actions">
+                  <button type="button" id="pm-delete" class="pm-btn pm-btn-danger">删除文章</button>
+                  <p id="pm-delete-status" class="pm-status" role="status"></p>
+                </div>
+              </div>
+            </details>
+          </div>
+        </details>
+      </fieldset>
+    </form>
+  </div>
+</div>
+<script src="{{ "js/write.js" | relURL }}" defer></script>
+{{- end }}

@@ -84,7 +84,7 @@ enableRobotsTXT = true
 [[menu.main]]
   identifier = "write"
   name = "写文章"
-  url = "https://app.pagescms.org/DechuangYang/DechuangYang.github.io"
+  url = "/write/"
   weight = 60
 
 [markup]
