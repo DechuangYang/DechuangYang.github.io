@@ -100,13 +100,16 @@
           <summary>发布到 GitHub（在线上线）与文章管理</summary>
           <div class="pm-publish-body">
             <label class="pm-field">
-              <span class="pm-field-label">GitHub 细粒度访问令牌（Fine-grained PAT，需 <code>DechuangYang.github.io</code> 的 Contents 读写权限）</span>
-              <input id="pm-token" type="password" autocomplete="off" placeholder="github_pat_...">
+              <span class="pm-field-label">GitHub 细粒度访问令牌（仅需授权 <code>DechuangYang.github.io</code> 的 Contents 读写权限 · <a class="pm-link" href="https://github.com/settings/personal-access-tokens/new" target="_blank" rel="noopener">去生成 ↗</a>）</span>
+              <input id="pm-token" type="password" autocomplete="off" placeholder="github_pat_...（填一次后本机自动记住）">
             </label>
-            <label class="pm-checkbox">
-              <input id="pm-remember-token" type="checkbox">
-              在当前标签页会话中记住令牌（关闭标签页后自动清除）
-            </label>
+            <div class="pm-publish-actions">
+              <label class="pm-checkbox">
+                <input id="pm-remember-token" type="checkbox" checked>
+                在本机浏览器长期记住令牌（下次打开自动填入）
+              </label>
+              <button type="button" id="pm-clear-token" class="pm-btn pm-btn-sm">清除已保存令牌</button>
+            </div>
             <label class="pm-checkbox">
               <input id="pm-publish-confirm" type="checkbox">
               我确认将这篇文章和正文图片公开发布到 https://dechuangyang.github.io/
