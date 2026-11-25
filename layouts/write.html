@@ -116,6 +116,8 @@
             </label>
             <div class="pm-publish-actions">
               <button type="submit" id="pm-publish" class="pm-btn pm-btn-primary">发布文章</button>
+        <button type="button" id="pm-summarize" class="pm-btn">✨ 用 Gemini 4 Neon 生成总结</button>
+        <span id="pm-summarize-status" class="pm-status" role="status" aria-live="polite"></span>
               <p id="pm-publish-status" class="pm-status" role="status"></p>
               <a id="pm-commit-link" class="pm-link" target="_blank" rel="noopener" hidden>查看 GitHub 提交 ↗</a>
               <a id="pm-actions-link" class="pm-link" href="https://github.com/DechuangYang/DechuangYang.github.io/actions" target="_blank" rel="noopener" hidden>查看部署进度 ↗</a>
@@ -147,4 +149,98 @@
   </div>
 </div>
 <script src="{{ "js/write.js" | relURL }}" defer></script>
+<script>
+(function () {
+  var btn = document.getElementById('pm-summarize');
+  var statusEl = document.getElementById('pm-summarize-status');
+  if (!btn || !statusEl) return;
+
+  var REPO = 'DechuangYang/DechuangYang.github.io';
+  var WF = 'summarize-post.yml';
+
+  function resolveTargetPath() {
+    var activeId = '';
+    try { activeId = (localStorage.getItem('pm-hugo:active-draft') || '').trim(); } catch (e) {}
+    if (activeId) {
+      return 'content/posts/p-' + activeId + '/index.md';
+    }
+    var sel = document.getElementById('pm-post-select');
+    if (sel && sel.value) {
+      var val = sel.value;
+      var idx = val.indexOf(':');
+      var type = idx > 0 ? val.slice(0, idx) : '';
+      var path = idx > 0 ? val.slice(idx + 1) : val;
+      if (type === 'dir') return path.replace(/\/+$/, '') + '/index.md';
+      if (path) return path;
+    }
+    return '';
+  }
+
+  btn.addEventListener('click', async function () {
+    var tokenInput = document.getElementById('pm-token');
+    var k = (tokenInput && tokenInput.value ? tokenInput.value.trim() : '');
+    if (!k) {
+      try { k = (localStorage.getItem('pm-hugo:saved-token') || '').trim(); } catch (e) {}
+    }
+    if (!k) {
+      statusEl.textContent = '请先在上方填写 GitHub 凭据（需包含本仓库 Actions 读写权限）。';
+      return;
+    }
+
+    var postPath = resolveTargetPath();
+    if (!postPath) {
+      statusEl.textContent = '未检测到当前文章路径，请先保存并发布文章到 GitHub。';
+      return;
+    }
+
+    var bodyEl = document.getElementById('pm-body');
+    var hasSummary = bodyEl && (bodyEl.value || '').indexOf('# 深度整理笔记') !== -1;
+    var overwrite = false;
+    if (hasSummary) {
+      if (!window.confirm('当前文章已包含「深度整理笔记」，是否让 Gemini 4 Neon 覆盖重新生成？')) {
+        return;
+      }
+      overwrite = true;
+    }
+
+    btn.disabled = true;
+    statusEl.textContent = '正在触发 Gemini 4 Neon 总结（' + postPath + '）...';
+
+    try {
+      var resp = await fetch(
+        'https://api.github.com/repos/' + REPO + '/actions/workflows/' + WF + '/dispatches',
+        {
+          method: 'POST',
+          headers: {
+            'Accept': 'application/vnd.github+json',
+            'Authorization': 'Bearer ' + k,
+            'X-GitHub-Api-Version': '2022-11-28',
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            ref: 'main',
+            inputs: { post_path: postPath, overwrite: overwrite ? 'true' : 'false' }
+          })
+        }
+      );
+
+      if (resp.status === 204) {
+        statusEl.innerHTML =
+          '✅ 已触发生成，约 1～2 分钟后自动提交并部署（<a href="https://github.com/' +
+          REPO + '/actions/workflows/' + WF +
+          '" target="_blank" rel="noopener" style="text-decoration:underline;">查看进度</a>）。';
+      } else if (resp.status === 401 || resp.status === 403) {
+        statusEl.textContent = '❌ 权限不足（HTTP ' + resp.status + '），请确认上方凭据已勾选本仓库 Actions: Read and write 权限。';
+      } else {
+        var txt = await resp.text();
+        statusEl.textContent = '❌ 触发失败（HTTP ' + resp.status + '）：' + txt.slice(0, 120);
+      }
+    } catch (e) {
+      statusEl.textContent = '❌ 请求失败：' + (e && e.message ? e.message : e);
+    } finally {
+      btn.disabled = false;
+    }
+  });
+})();
+</script>
 {{- end }}
